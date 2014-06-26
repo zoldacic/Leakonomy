@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" ng-app="myapp">
+<head>
+    <title></title>    
+    <!--<script src='http://cdnjs.cloudflare.com/ajax/libs/ng-grid/2.0.11/ng-grid.css'></script>--> 
+    <!--<script type="text/javascript" src="http://angular-ui.github.com/ng-grid/css/ng-grid.css"></script>-->
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.6/angular.min.js'></script>
+    <script src='https://cdn.firebase.com/js/client/1.0.17/firebase.js'></script>
+    <script src='https://cdn.firebase.com/libs/angularfire/0.7.1/angularfire.min.js'></script>
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js'></script>    
+    <!--<script src='http://cdnjs.cloudflare.com/ajax/libs/ng-grid/2.0.11/ng-grid.min.js'></script>-->  
+    
+    <script type="text/javascript" src="http://angular-ui.github.com/ng-grid/lib/ng-grid.debug.js"></script>     
+
+    <link href="Bulk.css" rel="stylesheet" />
+
+
+
+
+</head>
+<body ng-controller="MyController">
+
+    <div id="messagesDiv">  
+        <div ng-repeat="transaction in transactions"><em>{{transaction.transactionDate}}</em>: {{transaction.event}}</div>
+    </div>
+    <!--<input type="text" ng-model="name" placeholder="Name">
+    <input type="text" ng-model="msg" ng-keydown="addMessage($event)" placeholder="Message...">-->
+
+    <textarea ng-model="rawText" style="width: 500px; height: 200px"></textarea>
+    <button ng-click="parseRawText()">Preview</button>
+
+    <div class="gridStyle" ng-grid="gridOptions"></div>
+
+    <button ng-click="addAll()">Add all</button>
+
+
+    <script>
+        var app = angular.module('myapp', ['firebase', 'ngGrid']);
+
+        function MyController($scope, $firebase) {
+            var baseRef = 'https://leakonomy.firebaseio.com/';
+            //$scope.transactions = $firebase(new Firebase(baseRef + '/transactions'));
+            $scope.transactions = [{ transactionDate: '112233', event: 'aaaa', amount: '100,00' }];
+            $scope.gridOptions = {
+                data: 'transactions',
+                columnDefs: [{ field: 'transactionDate', displayName: 'TransactionDate' }, { field: 'event', displayName: 'Event' }, { field: 'amount', displayName: 'Amount' }]
+            };
+
+            $scope.parseRawText = function () {
+                var rawTransactions = $scope.rawText.split("\n");
+
+                angular.forEach(rawTransactions, function (rawTransaction, key) {
+                    if (rawTransaction.trim().length > 0) {
+                        var textParts = rawTransaction.split(" ");
+
+                        var event = '';
+                        for (var i = 1; i < textParts.length - 1; i++) {
+                            event += ' ' + textParts[i];
+                        }
+                        var transaction = { transactionDate: textParts[0], event: event.trim(), amount: textParts[textParts.length - 1] };
+                        $scope.transactions.push(transaction);
+                        //$scope.transactions.$add(transaction);
+
+                    }
+                });
+            }
+
+            //$scope.messages = $firebase(ref);
+            //$scope.addMessage = function (e) {
+            //    if (e.keyCode != 13) return;
+            //    $scope.messages.$add({ from: $scope.name, body: $scope.msg });
+            //    $scope.msg = "";
+            //}
+        }
+    </script>
+
+</body>
+</html>
